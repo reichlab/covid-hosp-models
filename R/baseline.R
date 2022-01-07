@@ -169,7 +169,7 @@ for (i in 1:(model_number + 1)) {
       truth_data = truth_for_plotting,
       truth_source = "HealthData",
       fill_transparency = .5,
-      top_layer = forecast,
+      top_layer = "forecast",
       subtitle = "none",
       title = "none",
       show_caption = FALSE,
