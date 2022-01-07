@@ -18,9 +18,9 @@ load_hosp_data <- function(as_of = NULL,
                            signal,
                            temporal_resolution = "daily",
                            na.rm = FALSE) {
-  library(dplyr)
-  library(readr)
-  library(tidyverse)
+  require(dplyr)
+  require(readr)
+  require(tidyverse)
 
   # load location data
   location_data <- readr::read_csv(file = "data/locations.csv",

@@ -139,7 +139,7 @@ fit_baseline_one_location <- function(reference_date,
   forecast_date <- reference_date + 2
   last_data_date <- max(location_data$time_value)
   last_target_date <- forecast_date + 28L
-  effective_horizon <- as.integer(last_target_date - last_data_date)
+  effective_horizon <- as.integer(last_target_date - forecast_date)
   h_adjustments <- as.integer(effective_horizon - 28L)
   # set baseline variations to fit
   variations_to_fit <- tidyr::expand_grid(
@@ -206,15 +206,14 @@ fit_baseline_one_location <- function(reference_date,
     temporal_resolution = temporal_resolution
   )
   # extract quantile forecasts
+  is_weekly <- as.numeric(temporal_resolution == "weekly")
   quantiles_df <-
     dplyr::bind_cols(variations_to_fit, predictions) %>%
     tidyr::unnest(quantiles_df) %>%
     dplyr::transmute(
       forecast_date = as.character(forecast_date),
       target = paste(h, target_name),
-      target_end_date = as.character(reference_date
-                                     +
-                                       7L * h),
+      target_end_date = as.character(reference_date + h + 6L * is_weekly * h ),
       abbreviation = toupper(unique(location_data$geo_value)),
       type = 'quantile',
       quantile = quantile,

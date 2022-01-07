@@ -26,7 +26,8 @@ required_locations <-
 reference_date <- as.character(lubridate::floor_date(Sys.Date(), unit = "week") - 1)
 forecast_date <- as.character(as.Date(reference_date) + 2)
 # Load data
-data <- load_hosp_data(as_of = forecast_date, signal = "confirmed_admissions_covid_1d") %>%
+data <- load_hosp_data(signal = "confirmed_admissions_covid_1d") %>%
+  dplyr::filter(date >= as.Date("2020-09-01")) %>%
   dplyr::left_join(required_locations, by = "location") %>%
   dplyr::mutate(geo_value = tolower(abbreviation)) %>%
   dplyr::select(geo_value, time_value = date, value)
@@ -35,12 +36,15 @@ location_number <- length(required_locations$abbreviation)
 # set variation of baseline to fit
 transformation_variation <- c("none", "sqrt")
 symmetrize_variation <- c(TRUE, FALSE)
-window_size_variation <- 28
+window_size_variation <- c(14, 21, 28)
+
+
 # fit baseline models
 reference_date <- lubridate::ymd(reference_date)
 quantile_forecasts <-
   purrr::map_dfr(required_locations$abbreviation,
                  function(location) {
+                   print(paste("location", location))
                    data <- data %>%
                      dplyr::filter(geo_value == tolower(location))
                    location_results <-
@@ -68,6 +72,15 @@ quantile_forecasts <-
 
 model_number <- length(unique(quantile_forecasts$model))
 model_names <- c(unique(quantile_forecasts$model), "baseline_ensemble")
+
+## create the directories if they don't exist
+for(i in 1:length(model_names)) {
+  if(!dir.exists(paste0('./weekly-submission/forecasts','/UMassCoE-',model_names[i],'/')))
+    dir.create(paste0('./weekly-submission/forecasts','/UMassCoE-',model_names[i],'/'))
+  if(!dir.exists(paste0('./weekly-submission/baseline-plots','/UMassCoE-',model_names[i],'/')))
+    dir.create(paste0('./weekly-submission/baseline-plots','/UMassCoE-',model_names[i],'/'))
+}
+
 model_folders <-
   paste0('/UMassCoE-',
          model_names,
@@ -120,8 +133,8 @@ write.csv(baseline_ensemble %>% dplyr::transmute(
   type = type,
   quantile = quantile,
   value = value),
-file = results_paths[model_number + 1],
-row.names = FALSE)
+  file = results_paths[model_number + 1],
+  row.names = FALSE)
 
 # load ensemble back in and bind with other baselines for plotting
 all_baselines <- dplyr::bind_rows(
@@ -138,6 +151,12 @@ all_baselines <- dplyr::bind_rows(
 )
 )
 
+truth_for_plotting <- load_truth(
+  truth_source = "HealthData",
+  target_variable = "inc hosp",
+  data_location = "covidData"
+)
+
 for (i in 1:(model_number + 1)) {
   # plot
   plot_path <- plot_paths[i]
@@ -147,7 +166,10 @@ for (i in 1:(model_number + 1)) {
         dplyr::filter(model == paste0('UMassCoE-',model_names[i])),
       facet = "~location",
       hub = "US",
+      truth_data = truth_for_plotting,
       truth_source = "HealthData",
+      fill_transparency = .5,
+      top_layer = forecast,
       subtitle = "none",
       title = "none",
       show_caption = FALSE,
