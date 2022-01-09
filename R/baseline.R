@@ -71,7 +71,7 @@ quantile_forecasts <-
                 model)
 
 model_number <- length(unique(quantile_forecasts$model))
-model_names <- c(unique(quantile_forecasts$model), "baseline_ensemble")
+model_names <- c(unique(quantile_forecasts$model), "trends_ensemble")
 
 ## create the directories if they don't exist
 for(i in 1:length(model_names)) {
@@ -118,14 +118,14 @@ all_baselines <- covidHubUtils::load_forecasts_repo(
 )
 
 # build ensemble
-baseline_ensemble <- hubEnsembles::build_quantile_ensemble(
+trends_ensemble <- hubEnsembles::build_quantile_ensemble(
   all_baselines,
   forecast_date = forecast_date,
-  model_name = "baseline_ensemble"
+  model_name = "trends_ensemble"
 )
 
 # save ensemble in hub format
-write.csv(baseline_ensemble %>% dplyr::transmute(
+write.csv(trends_ensemble %>% dplyr::transmute(
   forecast_date = forecast_date,
   target = paste(horizon, temporal_resolution, "ahead", target_variable),
   target_end_date = target_end_date,
