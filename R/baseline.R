@@ -23,8 +23,9 @@ required_locations <-
 # The forecast_date is the Monday of forecast creation.
 # The forecast creation date is set to a Monday,
 # even if we are delayed and create it Tuesday morning.
-reference_date <- as.character(lubridate::floor_date(Sys.Date(), unit = "week") - 1)
-forecast_date <- as.character(as.Date(reference_date) + 2)
+reference_date <- Sys.Date()
+  #as.character(lubridate::floor_date(Sys.Date(), unit = "week") - 1)
+forecast_date <- reference_date# as.character(as.Date(reference_date) + 2)
 # Load data
 data <- load_hosp_data(signal = "confirmed_admissions_covid_1d") %>%
   dplyr::filter(date >= as.Date("2020-09-01")) %>%
@@ -75,18 +76,18 @@ model_names <- c(unique(quantile_forecasts$model), "trends_ensemble")
 
 ## create the directories if they don't exist
 for(i in 1:length(model_names)) {
-  if(!dir.exists(paste0('./weekly-submission/forecasts','/UMassCoE-',model_names[i],'/')))
-    dir.create(paste0('./weekly-submission/forecasts','/UMassCoE-',model_names[i],'/'))
-  if(!dir.exists(paste0('./weekly-submission/baseline-plots','/UMassCoE-',model_names[i],'/')))
-    dir.create(paste0('./weekly-submission/baseline-plots','/UMassCoE-',model_names[i],'/'))
+  if(!dir.exists(paste0('./weekly-submission/forecasts','/UMass-',model_names[i],'/')))
+    dir.create(paste0('./weekly-submission/forecasts','/UMass-',model_names[i],'/'))
+  if(!dir.exists(paste0('./weekly-submission/baseline-plots','/UMass-',model_names[i],'/')))
+    dir.create(paste0('./weekly-submission/baseline-plots','/UMass-',model_names[i],'/'))
 }
 
 model_folders <-
-  paste0('/UMassCoE-',
+  paste0('/UMass-',
          model_names,
          '/',
          forecast_date,
-         '-UMassCoE-',
+         '-UMass-',
          model_names)
 results_paths <-
   paste0('weekly-submission/forecasts', model_folders, '.csv')
@@ -108,7 +109,7 @@ for (i in 1:model_number) {
 # build_quantile_ensemble and plot_forecasts
 all_baselines <- covidHubUtils::load_forecasts_repo(
   file_path = paste0('weekly-submission/forecasts/'),
-  models = paste0('UMassCoE-', model_names[1:model_number]),
+  models = paste0('UMass-', model_names[1:model_number]),
   forecast_dates = forecast_date,
   locations = NULL,
   types = NULL,
@@ -141,7 +142,7 @@ all_baselines <- dplyr::bind_rows(
   all_baselines,
   covidHubUtils::load_forecasts_repo(
   file_path = paste0('weekly-submission/forecasts/'),
-  models = paste0('UMassCoE-', model_names[model_number + 1]),
+  models = paste0('UMass-', model_names[model_number + 1]),
   forecast_dates = forecast_date,
   locations = NULL,
   types = NULL,
@@ -163,7 +164,7 @@ for (i in 1:(model_number + 1)) {
   p <-
     covidHubUtils::plot_forecasts(
       forecast_data = all_baselines %>%
-        dplyr::filter(model == paste0('UMassCoE-',model_names[i])),
+        dplyr::filter(model == paste0('UMass-',model_names[i])),
       facet = "~location",
       hub = "US",
       truth_data = truth_for_plotting,
