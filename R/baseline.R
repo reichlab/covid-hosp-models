@@ -10,7 +10,7 @@ library(hubEnsembles)
 library(ggforce)
 # library(here)
 # setwd(here())
-source("./R/load_hosp_data.R")
+source("../flu-hosp-models-2021-2022/R/load_flu_hosp_data.R")
 source("./R/fit_baseline_one_location.R")
 
 # Set locations and quantiles
@@ -27,7 +27,7 @@ reference_date <- Sys.Date()
   #as.character(lubridate::floor_date(Sys.Date(), unit = "week") - 1)
 forecast_date <- reference_date# as.character(as.Date(reference_date) + 2)
 # Load data
-data <- load_hosp_data(signal = "confirmed_admissions_covid_1d") %>%
+data <- load_hosp_data(pathogen = "covid") %>%
   dplyr::filter(date >= as.Date("2020-09-01")) %>%
   dplyr::left_join(required_locations, by = "location") %>%
   dplyr::mutate(geo_value = tolower(abbreviation)) %>%
