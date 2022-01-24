@@ -56,7 +56,7 @@ get_baseline_predictions <- function(location_data,
 
   # predict
   daily_predictions <-
-    predict(baseline_fit, nsim = 100000, horizon = daily_horizons, origin="obs")
+    predict(baseline_fit, nsim = 100000, horizon = daily_horizons, origin="median", n_origin = 4, force_nonneg = TRUE)
 
   # truncate to non-negative
   predictions <- pmax(daily_predictions, 0)
