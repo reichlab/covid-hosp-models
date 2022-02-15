@@ -1,4 +1,4 @@
-# Simple models foc COVID-19 hospitalizations
+# Simple models for COVID-19 hospitalizations
 
 The models built here use the HHS Protect daily COVID-19 hospital admissions data.
 
