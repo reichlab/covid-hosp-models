@@ -11,6 +11,7 @@ We create a set of simple baseline models that project existing trends into the 
 2. Install the epitools R package (as of Jan 6, 2022, you need to install [a specific branch on a specific fork](https://github.com/elray1/epitools/tree/outlier_correction)).
 3. Install the [hubEnsembles](https://github.com/reichlab/hubEnsembles) R package.
 4. Install the [covidHubUtils](https://github.com/reichlab/covidHubUtils) R package.
+5. Clone this repo and the [flu-hosp-models-2021-2022 repo](https://github.com/reichlab/flu-hosp-models-2021-2022) so both clones live in the same home directory.
 
 ## workflow
 
