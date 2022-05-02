@@ -1,7 +1,7 @@
 library(tidyverse)
 library(covidData)
 
-forecast_date <- "2022-04-18"
+forecast_date <- as.character(lubridate::floor_date(Sys.Date(), unit = "week") + 1)
 
 cases_path <- "weekly-submission/sarix-forecasts/cases"
 hosps_path <- "weekly-submission/sarix-forecasts/hosps"
@@ -15,14 +15,27 @@ models <- list.dirs(
   full.names = FALSE,
   recursive = FALSE)
 
-models <- c("SARIX_covariates_none_smooth_False_transform_fourthrt_p_7_d_0_P_0_D_0",
-            "SARIX_covariates_none_smooth_False_transform_fourthrt_p_14_d_0_P_0_D_0")
-models <- c("SARIX_covariates_cases_smooth_False_transform_fourthrt_p_7_d_0_P_0_D_0",
-            "SARIX_covariates_cases_smooth_False_transform_fourthrt_p_14_d_0_P_0_D_0")
+models <- c(
+    "UMass-sarix",
+    # "UMass-sarix_env",
+    "UMass-sarix_no_cases"
+)
+
+forecast_exists <- purrr::map_lgl(
+    models,
+    function(model) {
+        file.exists(file.path(hosps_path, model, paste0(forecast_date, "-", model, ".csv")))
+    })
+models <- models[forecast_exists]
+
+# models <- c("SARIX_covariates_none_smooth_False_transform_fourthrt_p_7_d_0_P_0_D_0",
+#             "SARIX_covariates_none_smooth_False_transform_fourthrt_p_14_d_0_P_0_D_0")
+# models <- c("SARIX_covariates_cases_smooth_False_transform_fourthrt_p_7_d_0_P_0_D_0",
+#             "SARIX_covariates_cases_smooth_False_transform_fourthrt_p_14_d_0_P_0_D_0")
 
 
-cases_truth <- readr::read_csv("data/cdc_data_smoothed_2022-04-18.csv")
-hosps_truth <- readr::read_csv("data/jhu_data_smoothed_2022-04-18.csv")
+cases_truth <- readr::read_csv(paste0("data/cdc_data_smoothed_", forecast_date, ".csv"))
+hosps_truth <- readr::read_csv(paste0("data/jhu_data_smoothed_", forecast_date, ".csv"))
 location_info <- readr::read_csv("data/locations.csv")
 truth <- dplyr::bind_rows(
   cases_truth %>%
@@ -40,12 +53,12 @@ for (model in models) {
   forecasts <- readr::read_csv(
     file.path(hosps_path, model, paste0(forecast_date, "-", model, ".csv"))) %>%
     dplyr::mutate(target_var = "hosps")
-  if (grepl("cases", model)) {
-    case_forecasts <- readr::read_csv(
-      file.path(cases_path, model, paste0(forecast_date, "-", model, ".csv"))) %>%
-    dplyr::mutate(target_var = "cases")
-    forecasts <- dplyr::bind_rows(forecasts, case_forecasts)
-  }
+#   if (grepl("cases", model)) {
+#     case_forecasts <- readr::read_csv(
+#       file.path(cases_path, model, paste0(forecast_date, "-", model, ".csv"))) %>%
+#     dplyr::mutate(target_var = "cases")
+#     forecasts <- dplyr::bind_rows(forecasts, case_forecasts)
+#   }
   forecasts$quantile <- format(forecasts$quantile, digits = 3, nsmall = 3)
 
   point_forecasts <- forecasts %>%

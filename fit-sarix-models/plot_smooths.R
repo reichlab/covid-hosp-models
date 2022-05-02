@@ -17,6 +17,108 @@ cdc_data <- readr::read_csv(paste0("data/cdc_data_smoothed_", reference_date, ".
 #   case_rate_fourthrt_seasonal = col_double()
 # ))
 
+if (!dir.exists('weekly-submission/sarix-plots/data/')) {
+    dir.create('weekly-submission/sarix-plots/data/', recursive = TRUE)
+}
+
+pdf(paste0('weekly-submission/sarix-plots/data/data_smoothed_', reference_date, '.pdf'), width = 12, height = 8)
+for (loc in unique(jhu_data$location)) {
+  jhu_loc_data <- jhu_data %>%
+    dplyr::filter(location == loc) %>%
+    dplyr::select(date, location, case_rate, corrected_case_rate, corrected_case_rate_taylor_0) %>%
+    dplyr::mutate(source = "jhu")
+  # nyt_loc_data <- nyt_data %>%
+  #   dplyr::filter(location == loc, date >= "2020-10-01") %>%
+  #   dplyr::select(date, location, case_rate_sqrt, corrected_case_rate_sqrt_taylor_0) %>%
+  #   dplyr::mutate(source = "nyt")
+  cdc_loc_data <- cdc_data %>%
+    dplyr::filter(location == loc, date >= "2020-10-01") %>%
+    dplyr::select(date, location, case_rate, corrected_case_rate, corrected_case_rate_taylor_0) %>%
+    dplyr::mutate(source = "cdc")
+  loc_data <- dplyr::bind_rows(jhu_loc_data,
+                              #  nyt_loc_data,
+                               cdc_loc_data)
+  loc_data <- loc_data %>%
+    tidyr::pivot_longer(c("case_rate", "corrected_case_rate", "corrected_case_rate_taylor_0")) %>%
+    dplyr::mutate(
+      signal = dplyr::case_when(
+        name == "case_rate" ~ "case_rate",
+        name == "corrected_case_rate" ~ "corrected",
+        TRUE ~ "trend"))
+  loc_data <- dplyr::left_join(
+    loc_data,
+    loc_data %>%
+      dplyr::filter(signal == "trend") %>%
+      dplyr::group_by(date) %>%
+      dplyr::summarise(
+        combined_value = median(value)
+      ),
+    by = c("date")
+  )
+  p <- ggplot(data = loc_data) +
+    geom_line(mapping = aes(x = date, y = value, color = signal), size = 1) +
+    geom_line(mapping = aes(x = date, y = combined_value)) +
+    facet_wrap( ~ source, ncol = 1) +
+    ggtitle(loc) +
+    theme_bw()
+  print(p)
+}
+dev.off()
+
+
+
+pdf(paste0('weekly-submission/sarix-plots/data/data_smoothed_then_fourthrt', reference_date, '.pdf'), width = 12, height = 8)
+for (loc in unique(jhu_data$location)) {
+  jhu_loc_data <- jhu_data %>%
+    dplyr::filter(location == loc) %>%
+    dplyr::select(date, location, case_rate, corrected_case_rate, corrected_case_rate_taylor_0) %>%
+    dplyr::mutate(source = "jhu")
+  # nyt_loc_data <- nyt_data %>%
+  #   dplyr::filter(location == loc, date >= "2020-10-01") %>%
+  #   dplyr::select(date, location, case_rate_sqrt, corrected_case_rate_sqrt_taylor_0) %>%
+  #   dplyr::mutate(source = "nyt")
+  cdc_loc_data <- cdc_data %>%
+    dplyr::filter(location == loc, date >= "2020-10-01") %>%
+    dplyr::select(date, location, case_rate, corrected_case_rate, corrected_case_rate_taylor_0) %>%
+    dplyr::mutate(source = "cdc")
+  loc_data <- dplyr::bind_rows(jhu_loc_data,
+                              #  nyt_loc_data,
+                               cdc_loc_data)
+  loc_data <- loc_data %>%
+    tidyr::pivot_longer(c("case_rate", "corrected_case_rate", "corrected_case_rate_taylor_0")) %>%
+    dplyr::mutate(
+      signal = dplyr::case_when(
+        name == "case_rate" ~ "case_rate",
+        name == "corrected_case_rate" ~ "corrected",
+        TRUE ~ "trend"))
+  loc_data <- dplyr::left_join(
+    loc_data,
+    loc_data %>%
+      dplyr::filter(signal == "trend") %>%
+      dplyr::group_by(date) %>%
+      dplyr::summarise(
+        combined_value = median(value)
+      ),
+    by = c("date")
+  ) %>%
+    dplyr::mutate(
+        value = value**0.25,
+        combined_value = combined_value**0.25
+    )
+  p <- ggplot(data = loc_data) +
+    geom_line(mapping = aes(x = date, y = value, color = signal), size = 1) +
+    geom_line(mapping = aes(x = date, y = combined_value)) +
+    facet_wrap( ~ source, ncol = 1) +
+    ggtitle(loc) +
+    theme_bw()
+  print(p)
+}
+dev.off()
+
+
+
+
+
 pdf(paste0('weekly-submission/sarix-plots/data/data_smoothed_sqrt_', reference_date, '.pdf'), width = 12, height = 8)
 for (loc in unique(jhu_data$location)) {
   jhu_loc_data <- jhu_data %>%

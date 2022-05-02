@@ -1,6 +1,6 @@
 library(tidyverse)
 
-cdc_data <- readr::read_csv("data/United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+# cdc_data <- readr::read_csv("data/United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
 cdc_data <- readr::read_csv("https://data.cdc.gov/api/views/9mfq-cb36/rows.csv?accessType=DOWNLOAD")
 cdc_data$date <- lubridate::mdy(cdc_data$submission_date)
 
