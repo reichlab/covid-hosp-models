@@ -15,11 +15,11 @@ models <- list.dirs(
   full.names = FALSE,
   recursive = FALSE)
 
-models <- c(
-    "UMass-sarix",
-    # "UMass-sarix_env",
-    "UMass-sarix_no_cases"
-)
+# models <- c(
+#     "UMass-sarix",
+#     # "UMass-sarix_env",
+#     "UMass-sarix_no_cases"
+# )
 
 forecast_exists <- purrr::map_lgl(
     models,
