@@ -247,8 +247,8 @@ if __name__ == "__main__":
     # define model variations to fit
     data = load_data(forecast_date)
     sarix_variations =  expand_grid({
-        # 'covariates': ['none'],
-        'covariates': ['none', 'cases'],
+        'covariates': ['none'],
+        # 'covariates': ['none', 'cases'],
         # 'covariates': ['cases'],
         # 'smooth_covariates': [False, True],
         'smooth_covariates': [False],
