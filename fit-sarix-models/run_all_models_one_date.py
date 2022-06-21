@@ -10,18 +10,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
 
 from datetime import date
 
 import itertools
 
 from sarix import sarix
-
-import tensorflow as tf
-import tensorflow_probability as tfp
-from tensorflow_probability import distributions as tfd
-from tensorflow_probability import sts
 
 
 def expand_grid(data_dict):

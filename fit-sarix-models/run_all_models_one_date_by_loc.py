@@ -18,11 +18,6 @@ import itertools
 
 from sarix import sarix
 
-import tensorflow as tf
-import tensorflow_probability as tfp
-from tensorflow_probability import distributions as tfd
-from tensorflow_probability import sts
-
 
 def expand_grid(data_dict):
   """Create a dataframe from every combination of given values."""
