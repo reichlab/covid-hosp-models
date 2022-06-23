@@ -10,7 +10,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
 
 from datetime import date
 
@@ -88,6 +87,7 @@ def construct_forecast_df(location, forecast_date, pred_qs, q_levels, base_targe
 
 
 def save_forecast_files(location, forecast_date, hosp_pred_qs, case_pred_qs, q_levels, model_name):
+  print('in save_forecast_files')
   pred_df = construct_forecast_df(location,
                                  forecast_date,
                                  hosp_pred_qs,
@@ -96,9 +96,13 @@ def save_forecast_files(location, forecast_date, hosp_pred_qs, case_pred_qs, q_l
   
   # save predictions
   model_dir = Path("weekly-submission/sarix-forecasts/hosps-by-loc/") / model_name
+  print('in save_forecast_files, calling model_dir.mkdir')
   model_dir.mkdir(mode=0o775, parents=True, exist_ok=True)
+  print('in save_forecast_files, returned from model_dir.mkdir')
   file_path = model_dir / f"{forecast_date}-{model_name}-{location}.csv"
+  print('in save_forecast_files, calling pred_df.to_csv')
   pred_df.to_csv(file_path, index = False)
+  print('in save_forecast_files, returned from pred_df.to_csv')
   
   if case_pred_qs is not None:
     pred_df = construct_forecast_df(location,
@@ -169,7 +173,7 @@ def fit_sarix_variation(covariates, smooth_covariates, transform, p, d, P, D, po
     #   .dropna() \
     #   .values \
     #   .reshape((len(data.location.unique()), len(data.date.unique()), len(modeled_vars)))
-    
+    print('calling sarix.SARIX')
     sarix_fit = sarix.SARIX(
         xy = loc_data[modeled_vars].dropna().values,
         p = p,
@@ -182,6 +186,7 @@ def fit_sarix_variation(covariates, smooth_covariates, transform, p, d, P, D, po
         num_warmup = 1000,
         num_samples = 1000,
         num_chains = 1)
+    print('returned from sarix.SARIX')
     
     pred_samples = sarix_fit.predictions
     
@@ -223,6 +228,7 @@ def fit_sarix_variation(covariates, smooth_covariates, transform, p, d, P, D, po
         case_pred_qs = case_pred_qs * state_pop100k
     
     model_name = build_model_name(covariates, smooth_covariates, transform, p, d, P, D, pooling)
+    print('calling save_forecast_files')
     save_forecast_files(location=location,
                         forecast_date=forecast_date,
                         hosp_pred_qs=hosp_pred_qs,
