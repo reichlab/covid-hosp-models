@@ -39,9 +39,9 @@ load_hosp_data <- function(pathogen = c("flu", "covid"),
     stop("`source` must be either covidcast or HealthData")
   } else if (source == "HealthData" && !is.null(as_of)) {
     if (as_of != Sys.Date()) {
-      stop("`as_of` must be either `NULL` or the current date if source is HealthData")
+      warning("`as_of` must be either `NULL` or the current date if source is HealthData; setting to NULL")
+      as_of <- NULL
     }
-
   }
 
   valid_locations <- unique(c(
