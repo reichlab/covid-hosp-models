@@ -185,13 +185,13 @@ load_flu_hosp_data <- function(as_of = NULL,
                                temporal_resolution = "daily",
                                source = "HealthData",
                                na.rm = FALSE) {
-  
+
   # load location data
   location_data <- readr::read_csv(file = "data/locations.csv",
                                    show_col_types = FALSE) %>%
     dplyr::mutate(geo_value = tolower(abbreviation)) %>%
     dplyr::select(-c("population", "abbreviation"))
-  
+
   # validate function arguments
   if (!(source %in% c("covidcast", "HealthData"))) {
     stop("`source` must be either covidcast or HealthData")
@@ -199,9 +199,9 @@ load_flu_hosp_data <- function(as_of = NULL,
     if (as_of != Sys.Date()) {
       stop("`as_of` must be either `NULL` or the current date if source is HealthData")
     }
-    
+
   }
-  
+
   valid_locations <- unique(c(
     "*",
     location_data$geo_value,
@@ -215,7 +215,7 @@ load_flu_hosp_data <- function(as_of = NULL,
   if (!is.logical(na.rm)) {
     stop("`na.rm` must be a logical value")
   }
-  
+
   # get geo_value based on fips if fips are provided
   if (any(grepl("\\d", locations))) {
     locations <-
@@ -229,7 +229,7 @@ load_flu_hosp_data <- function(as_of = NULL,
   } else {
     locations_to_fetch <- locations
   }
-  
+
   # pull daily state data
   if (source == "covidcast") {
     state_dat <- covidcast::covidcast_signal(
@@ -265,8 +265,8 @@ load_flu_hosp_data <- function(as_of = NULL,
       ) %>%
       dplyr::arrange(geo_value, date)
   }
-  
-  
+
+
   # creating US and bind to state-level data if US is specified or locations
   if (locations_to_fetch == "*") {
     us_dat <- state_dat %>%
@@ -285,7 +285,7 @@ load_flu_hosp_data <- function(as_of = NULL,
   } else {
     dat <- state_dat
   }
-  
+
   # weekly aggregation
   if (temporal_resolution != "daily") {
     dat <- dat %>%
@@ -300,14 +300,14 @@ load_flu_hosp_data <- function(as_of = NULL,
       dplyr::ungroup() %>%
       dplyr::select(-"num_days")
   }
-  
+
   final_data <- dat %>%
     dplyr::left_join(location_data, by = "geo_value") %>%
     dplyr::select(date, location, location_name, value) %>%
     # drop data for locations retrieved from covidcast,
     # but not included in forecasting exercise -- mainly American Samoa
     dplyr::filter(!is.na(location))
-  
+
   return(final_data)
 }
 
@@ -322,8 +322,21 @@ required_locations <-
 # even if we are delayed and create it Tuesday morning.
 reference_date <- as.character(lubridate::floor_date(Sys.Date(), unit = "week") + 1)
 
-# Load data
-hosp_data <- load_hosp_data(pathogen = "covid", as_of = reference_date)
+# Load data (by dropping the last observation)
+hosp_data <- covidData::load_data(
+  spatial_resolution = c("national", "state"),
+  temporal_resolution = "daily",
+  measure = "hospitalizations",
+  drop_last_date = TRUE
+) %>%
+  dplyr::left_join(covidData::fips_codes, by = "location") %>%
+  dplyr::transmute(
+    date,
+    location,
+    location_name = ifelse(location_name == "United States", "US", location_name),
+    value = inc) %>%
+  dplyr::filter(location != "60") %>%
+  dplyr::arrange(location, date)
 
 case_data <- covidData::load_data(as_of = reference_date,
                                   spatial_resolution = c("state", "national"),
