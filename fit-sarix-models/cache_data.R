@@ -335,7 +335,6 @@ hosp_data <- covidData::load_data(
     location,
     location_name = ifelse(location_name == "United States", "US", location_name),
     value = inc) %>%
-  dplyr::filter(location != "60") %>%
   dplyr::arrange(location, date)
 
 case_data <- covidData::load_data(as_of = reference_date,
