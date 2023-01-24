@@ -10,7 +10,6 @@ library(hubEnsembles)
 library(ggforce)
 # library(here)
 # setwd(here())
-source("../flu-hosp-models-2021-2022/R/load_flu_hosp_data.R")
 source("./R/fit_baseline_one_location.R")
 
 # Set locations and quantiles
@@ -39,7 +38,6 @@ data <- covidData::load_data(
     location,
     location_name = ifelse(location_name == "United States", "US", location_name),
     value = inc) %>%
-  dplyr::filter(location != "60") %>%
   dplyr::arrange(location, date) %>%
   # the previous lines reproduce the output of the current `load_hosp_data` function
   # the following lines currently follow the call to `load_hosp_data` in baseline.R
