@@ -10,7 +10,6 @@ library(hubEnsembles)
 library(ggforce)
 # library(here)
 # setwd(here())
-source("../flu-hosp-models-2021-2022/R/load_flu_hosp_data.R")
 source("./R/fit_baseline_one_location.R")
 
 # Set locations and quantiles
@@ -27,12 +26,26 @@ reference_date <- Sys.Date()
   #as.character(lubridate::floor_date(Sys.Date(), unit = "week") - 1)
 forecast_date <- reference_date# as.character(as.Date(reference_date) + 2)
 # Load data
-data <- load_hosp_data(pathogen = "covid") %>%
+data <- covidData::load_data(
+  spatial_resolution = c("national", "state"),
+  temporal_resolution = "daily",
+  measure = "hospitalizations",
+  drop_last_date = TRUE
+) %>%
+  dplyr::left_join(covidData::fips_codes, by = "location") %>%
+  dplyr::transmute(
+    date,
+    location,
+    location_name = ifelse(location_name == "United States", "US", location_name),
+    value = inc) %>%
+  dplyr::arrange(location, date) %>%
+  # the previous lines reproduce the output of the current `load_hosp_data` function
+  # the following lines currently follow the call to `load_hosp_data` in baseline.R
   dplyr::filter(date >= as.Date("2020-09-01")) %>%
   dplyr::left_join(required_locations, by = "location") %>%
   dplyr::mutate(geo_value = tolower(abbreviation)) %>%
   dplyr::select(geo_value, time_value = date, value)
-
+  
 location_number <- length(required_locations$abbreviation)
 # set variation of baseline to fit
 transformation_variation <- c("none", "sqrt")
