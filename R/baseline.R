@@ -42,6 +42,7 @@ data <- covidData::load_data(
   # the previous lines reproduce the output of the current `load_hosp_data` function
   # the following lines currently follow the call to `load_hosp_data` in baseline.R
   dplyr::filter(date >= as.Date("2020-09-01")) %>%
+  dplyr::filter(location != "60") %>%
   dplyr::left_join(required_locations, by = "location") %>%
   dplyr::mutate(geo_value = tolower(abbreviation)) %>%
   dplyr::select(geo_value, time_value = date, value)
