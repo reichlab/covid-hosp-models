@@ -18,13 +18,16 @@ hosp_data <- covidData::load_data(
   measure = "hospitalizations",
   drop_last_date = TRUE
   ) %>%
+  dplyr::filter(location != "60") %>%
   dplyr::left_join(covidData::fips_codes, by = "location") %>%
   dplyr::transmute(
     date,
     location,
     location_name = ifelse(location_name == "United States", "US", location_name),
     value = inc) %>%
-  dplyr::arrange(location, date)
+  dplyr::arrange(location, date) %>%
+  # drop last 4 days of data
+  dplyr::filter(date <= max(date) - 4)
 
 case_data <- covidData::load_data(as_of = reference_date,
                                   spatial_resolution = c("state", "national"),
