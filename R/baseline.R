@@ -46,7 +46,7 @@ data <- covidData::load_data(
   dplyr::left_join(required_locations, by = "location") %>%
   dplyr::mutate(geo_value = tolower(abbreviation)) %>%
   dplyr::select(geo_value, time_value = date, value)
-  
+
 location_number <- length(required_locations$abbreviation)
 # set variation of baseline to fit
 transformation_variation <- c("none", "sqrt")
@@ -181,7 +181,9 @@ for (i in 1:(model_number + 1)) {
         dplyr::filter(model == paste0('UMass-',model_names[i])),
       facet = "~location",
       hub = "US",
-      truth_data = truth_for_plotting,
+      truth_data = truth_for_plotting %>%
+        dplyr::filter(target_end_date >= reference_date - (7 * 32) &
+                        target_end_date <= reference_date + 28),
       truth_source = "HealthData",
       fill_transparency = .5,
       top_layer = "forecast",
