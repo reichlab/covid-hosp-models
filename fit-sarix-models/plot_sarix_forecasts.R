@@ -34,15 +34,15 @@ models <- models[forecast_exists]
 #             "SARIX_covariates_cases_smooth_False_transform_fourthrt_p_14_d_0_P_0_D_0")
 
 
-cases_truth <- readr::read_csv(paste0("data/cdc_data_smoothed_", forecast_date, ".csv"))
+# cases_truth <- readr::read_csv(paste0("data/cdc_data_smoothed_", forecast_date, ".csv"))
 hosps_truth <- readr::read_csv(paste0("data/jhu_data_smoothed_", forecast_date, ".csv"))
 location_info <- readr::read_csv("data/locations.csv")
 truth <- dplyr::bind_rows(
-  cases_truth %>%
-    dplyr::left_join(location_info, by = "location") %>%
-    dplyr::transmute(date, location, location_name,
-                     value = case_rate * population / 100000,
-                     target_var = "cases"),
+#   cases_truth %>%
+#     dplyr::left_join(location_info, by = "location") %>%
+#     dplyr::transmute(date, location, location_name,
+#                      value = case_rate * population / 100000,
+#                      target_var = "cases"),
   hosps_truth %>%
     dplyr::transmute(date, location, location_name, value = hosps,
                      target_var = "hosps")
