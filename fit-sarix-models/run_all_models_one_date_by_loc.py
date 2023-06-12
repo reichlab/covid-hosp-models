@@ -46,20 +46,21 @@ def load_data(as_of = '2022-04-18'):
   hosp_df['hosp_rate_fourthrt'] = hosp_df['hosp_rate'] ** 0.25
   
   # load cases
-  case_df = pd.read_csv(f'data/cdc_data_smoothed_{as_of}.csv')
-  case_df = case_df[['location', 'date',
-    'corrected_case_rate', 'corrected_case_rate_taylor_0',
-    'corrected_case_rate_sqrt', 'corrected_case_rate_sqrt_taylor_0',
-    'corrected_case_rate_fourthrt', 'corrected_case_rate_fourthrt_taylor_0']]
+  #   case_df = pd.read_csv(f'data/cdc_data_smoothed_{as_of}.csv')
+  #   case_df = case_df[['location', 'date',
+  #     'corrected_case_rate', 'corrected_case_rate_taylor_0',
+  #     'corrected_case_rate_sqrt', 'corrected_case_rate_sqrt_taylor_0',
+  #     'corrected_case_rate_fourthrt', 'corrected_case_rate_fourthrt_taylor_0']]
   
   # merge
-  df = hosp_df.merge(case_df, on=["location", "date"], how = "left")
+  #df = hosp_df.merge(case_df, on=["location", "date"], how = "left")
+  df = hosp_df
   
   # ensure correct data types
   df.date = pd.to_datetime(df.date)
-  float_vars = ['hosp_rate', 'hosp_rate_sqrt', 'hosp_rate_fourthrt',
-    'corrected_case_rate_sqrt', 'corrected_case_rate_sqrt_taylor_0',
-    'corrected_case_rate_fourthrt', 'corrected_case_rate_fourthrt_taylor_0']
+  float_vars = ['hosp_rate', 'hosp_rate_sqrt', 'hosp_rate_fourthrt']#,
+  #  'corrected_case_rate_sqrt', 'corrected_case_rate_sqrt_taylor_0',
+  #  'corrected_case_rate_fourthrt', 'corrected_case_rate_fourthrt_taylor_0']
   df[float_vars] = df[float_vars].astype('float64')
   
   # TODO: fill missing values by linear interpolation?
