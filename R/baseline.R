@@ -30,7 +30,7 @@ data <- covidData::load_data(
   spatial_resolution = c("national", "state"),
   temporal_resolution = "daily",
   measure = "hospitalizations",
-  drop_last_date = TRUE
+  drop_last_date = FALSE
 ) %>%
   dplyr::left_join(covidData::fips_codes, by = "location") %>%
   dplyr::transmute(
