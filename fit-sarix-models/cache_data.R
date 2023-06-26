@@ -16,7 +16,7 @@ hosp_data <- covidData::load_data(
   spatial_resolution = c("national", "state"),
   temporal_resolution = "daily",
   measure = "hospitalizations",
-  drop_last_date = TRUE
+  drop_last_date = FALSE
   ) %>%
   dplyr::filter(location != "60") %>%
   dplyr::left_join(covidData::fips_codes, by = "location") %>%
@@ -25,9 +25,7 @@ hosp_data <- covidData::load_data(
     location,
     location_name = ifelse(location_name == "United States", "US", location_name),
     value = inc) %>%
-  dplyr::arrange(location, date) %>%
-  # drop last 4 days of data
-  dplyr::filter(date <= max(date) - 4)
+  dplyr::arrange(location, date)
 
 case_data <- covidData::load_data(as_of = reference_date,
                                   spatial_resolution = c("state", "national"),
