@@ -2,11 +2,14 @@
 
 library(tidyverse)
 library(readr)
+library(covidData)
+library(here)
+setwd(here::here())
 
 states_to_drop <- commandArgs(trailingOnly = TRUE)
 print(states_to_drop)
 
-locations_data <- read.csv("data-locations/locations.csv")
+locations_data <- covidData::fips_codes
 
 # double-check the location
 location_name <- locations_data %>%
@@ -21,7 +24,7 @@ location_code <- locations_data %>%
 print(location_code)
 
 # read the latest file
-file_names <- Sys.glob("data-processed/UMass-trends_ensemble/*.csv")
+file_names <- Sys.glob("weekly-submission/forecasts/UMass-trends_ensemble/*.csv")
 latest_file <- max(file_names)
 print(latest_file)
 
